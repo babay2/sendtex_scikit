@@ -12,6 +12,7 @@ from datetime import datetime
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
+from time import mktime
 from matplotlib import style
 
 style.use('dark_background')
@@ -50,8 +51,12 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                 full_file_path = each_dir+'/'+file
                 source = open(full_file_path, 'r').read()
                 try:
-                    value = float(source.split(gather+':</td><td class="yfnc_tabledata1">')[1].split('</td>')[0])
-
+                    try:
+                        value = float(source.split(gather+':</td><td class="yfnc_tabledata1">')[1].split('</td>')[0])
+                    except Exception as e:
+                        value = float(source.split(gather+':</td>\n<td class="yfnc_tabledata1">')[1].split('</td>')[0])
+#                        print(str(e),ticker, file)
+#                        time.sleep(15)
                     try:
                         sp500_date = datetime.fromtimestamp(unix_time).strftime('%Y-%m-%d')
                         row = sp500_df[(sp500_df['Date'] == sp500_date)]
@@ -61,7 +66,11 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                         sp500_date = datetime.fromtimestamp(unix_time-259200).strftime('%Y-%m-%d')
                         row = sp500_df[(sp500_df['Date'] == sp500_date)]
                         sp500_value = float(row['Adj Close'])
-                    stock_price = float(source.split('</small><big><b>')[1].split('</b></big>')[0])
+                    try:
+                        stock_price = float(source.split('</small><big><b>')[1].split('</b></big>')[0])
+                    except Exception as e:
+                        print(str(e))
+                        time.sleep(5)
                     
                     if not starting_stock_value:
                         starting_stock_value = stock_price
@@ -78,11 +87,21 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                                     'Price': stock_price,
                                     'stock_p_change': stock_p_change,
                                     'S&P500': sp500_value,
-                                    'sp500_p_change': sp500_p_change}, ignore_index=True)
-#                                    'Difference': difference,
+                                    'sp500_p_change': sp500_p_change, 
+                                    'Difference': stock_p_change - sp500_p_change},ignore_index=True)
 #                                    'Status': status}, ignore_index=True)
                 except Exception as e:
                     pass
+    for each_ticker in ticker_list:
+        try:
+            plot_df = df[(df['Ticker'] == each_ticker)]
+            plot_df = plot_df.set_index(['Date'])
+            plot_df['Difference'].plot(label=each_ticker)
+            plt.legend()
+            
+        except:
+            pass
+    plt.show()
 
     
     save = gather.replace(' ', '').replace(')', '').replace('(', '').replace('/', '')+str('.csv')
