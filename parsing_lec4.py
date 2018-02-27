@@ -54,8 +54,11 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                     try:
                         value = float(source.split(gather+':</td><td class="yfnc_tabledata1">')[1].split('</td>')[0])
                     except Exception as e:
-                        value = float(source.split(gather+':</td>\n<td class="yfnc_tabledata1">')[1].split('</td>')[0])
-#                        print(str(e),ticker, file)
+                        try:
+                            value = float(source.split(gather+':</td>\n<td class="yfnc_tabledata1">')[1].split('</td>')[0])
+                        except Exception as e:
+                            pass
+                        
 #                        time.sleep(15)
                     try:
                         sp500_date = datetime.fromtimestamp(unix_time).strftime('%Y-%m-%d')
@@ -69,8 +72,17 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                     try:
                         stock_price = float(source.split('</small><big><b>')[1].split('</b></big>')[0])
                     except Exception as e:
-                        print(str(e))
-                        time.sleep(5)
+                        try:
+                            stock_price = source.split('</small><big><b>')[1].split('</b></big>')[0]
+                            stock_price = re.search(r'(\d{1,9}\.\d{1,8})', stock_price)
+                            stock_price = float(stock_price.group(1))
+                            
+                        except Exception as e:
+                            try:
+                                stock_price = stock_price = float(source.split('<span id="yfs_l84_'+ticker+'">')[1].split('</span></span>')[0])
+                                
+                            except Exception as e:
+                                pass
                     
                     if not starting_stock_value:
                         starting_stock_value = stock_price
