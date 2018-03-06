@@ -53,12 +53,13 @@ FEATURES =  ['DE Ratio',
 def Build_Data_Set():
     data_df = pd.read_csv('key_stats.csv')
 #    data_df = data_df[:100]
+    data_df = data_df.reindex(np.random.permutation(data_df.index))
     X = np.array(data_df[FEATURES].values)
     y = (data_df['Status'].replace('underperform', 0).replace('outperform', 1).values.tolist())
     
     X = preprocessing.scale(X)
     
-    X, y = shuffle(X, y, random_state = 0)
+#    X, y = shuffle(X, y, random_state = 0)
     
     return X, y
 
@@ -77,4 +78,14 @@ def Analysis():
             
     print('Точность:', (correct_count / test_size) * 100.0)
     
+#def Randomizing():
+#    df = pd.DataFrame({'D1':range(5), 'D2':range(5)})
+#    print(df)
+#    df2 = df.reindex(np.random.permutation(df.index))
+#    print(df2)
+#    
+#Randomizing()
+
+
+
 Analysis()
