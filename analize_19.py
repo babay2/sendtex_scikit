@@ -12,6 +12,7 @@ from sklearn import svm, preprocessing
 from sklearn.utils import shuffle
 import pandas as pd
 from matplotlib import style
+import statistics
 style.use("ggplot")
 
 FEATURES =  ['DE Ratio',
@@ -65,12 +66,17 @@ def Build_Data_Set():
         print(str(e))
     
 #    X, y = shuffle(X, y, random_state = 0)
+    Z = np.array(data_df[['stock_p_change', 'sp500_p_change']])
     
-    return X, y
+    return X, y, Z
 
 def Analysis():
     test_size = 1000
-    X, y = Build_Data_Set()
+    invest_amount = 10000
+    total_invest = 0
+    if_market = 0
+    if_strat = 0
+    X, y, Z = Build_Data_Set()
     print(len(X))
     
     clf = svm.SVC(kernel = 'linear', C = 1.0)
@@ -80,17 +86,21 @@ def Analysis():
     for x in range(1, test_size+1):
         if clf.predict(X[[-x]])[0] == y[-x]:
             correct_count += 1
+        if clf.predict(X[[-x]])[0] == 1:
+            invest_return = invest_amount + (invest_amount * (Z[-x][0] / 100))
+            market_return = invest_amount + (invest_amount * (Z[-x][1] / 100))
+            
+            total_invest += 1
+            
+            if_market += market_return
+            if_strat += invest_return
             
     print('Точность:', (correct_count / test_size) * 100.0)
+    print('Всего торговых сессий:', total_invest)
+    print('Доход от стратегии', if_strat)
+    print('Доход по рынку', if_market)
     
-#def Randomizing():
-#    df = pd.DataFrame({'D1':range(5), 'D2':range(5)})
-#    print(df)
-#    df2 = df.reindex(np.random.permutation(df.index))
-#    print(df2)
-#    
-#Randomizing()
-
-
-
+    compared = ((if_strat - if_market) / if_market) * 100
+    print('Превышение стратегии над рынком', compared,'%')
+    
 Analysis()
