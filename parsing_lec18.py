@@ -214,13 +214,13 @@ def Key_Stats(gather=["Total Debt/Equity",
 
                     difference = stock_p_change - sp500_p_change
 
-                    if difference > 0:
-                        status = 'outperform'
+                    if difference > 5:
+                        status = 1
                     else:
-                        status = 'underperform'
+                        status = 0
 
 
-                    if value_list.count('N/A') > 0:
+                    if value_list.count('N/A') > 15:
                         pass
                     else:
                         try:
@@ -280,6 +280,6 @@ def Key_Stats(gather=["Total Debt/Equity",
                     pass
 
 
-    df.to_csv('key_stats_acc_perf_NO_NA.csv')
+    df.to_csv('key_stats_acc_perf_WITH_NA_enhanced.csv')
 
 Key_Stats()

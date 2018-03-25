@@ -52,7 +52,7 @@ FEATURES =  ['DE Ratio',
              'Shares Short (prior ']
 
 def Build_Data_Set():
-    data_df = pd.read_csv('key_stats_acc_perf_NO_NA.csv')
+    data_df = pd.read_csv('key_stats_acc_perf_NO_NA_enhanced.csv')
 #    data_df = data_df[:100]
     data_df = data_df.reindex(np.random.permutation(data_df.index))
     data_df = data_df.fillna(0)
@@ -101,6 +101,29 @@ def Analysis():
     print('Доход по рынку', if_market)
     
     compared = ((if_strat - if_market) / if_market) * 100
+    do_nothing = total_invest * invest_amount
+    
+    avg_market = ((if_market - do_nothing) / do_nothing) * 100
+    avg_strat = ((if_strat - do_nothing) / do_nothing) * 100
+    
     print('Превышение стратегии над рынком', compared,'%')
+    print('Усредненная прибыль стратегии:', str(avg_strat),'%')
+    print('Усредненная прибыль рынка',str(avg_market), '%')
+    
+    data_df = pd.read_csv('forward_sample_NO_NA.csv')
+    data_df = data_df.fillna(0)
+    X = np.array(data_df[FEATURES].values)
+    X = preprocessing.scale(X)
+    Z = data_df['Ticker'].values.tolist()
+    invest_list = []
+    for i in range(len(X)):
+        pred = clf.predict(X[[i]])[0]
+        if pred == 1:
+#            print(Z[i])
+            invest_list.append(Z[i])
+            
+    print(len(invest_list))
+    print(invest_list)
+    
     
 Analysis()
